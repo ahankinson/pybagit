@@ -1,0 +1,1 @@
+http://www.digitalpreservation.gov/library/resources/tools/docs/bagitspec.pdf - data/bagitspec.pdf

@@ -1,0 +1,13 @@
+Source-Organization: McGill University, Schulich School of Music
+Organization-Address: 555 Sherbrooke Street West
+Contact-Name: Andrew Hankinson
+Contact-Phone: +1 514-555-5555 
+Contact-Email: andrew.hankinson@mail.mcgill.ca 
+External-Description: This is a description that will go for a long time, or 
+	at least long enough to span a number of lines. This line has a tab at the
+    beginning and this one has spaces at the beginning. We should be able to
+ catch all lines, even if they only start with one space, like this one.
+Bagging-Date: 2010-02-17
+External-Identifier: testbag-001
+Bag-Group-Identifier: pybagit-testbag
+Bag-Count: 1 of 1
