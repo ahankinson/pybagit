@@ -3,7 +3,8 @@ PyBagIt Version 1.0
 This module helps with creating an managing BagIt-compliant packages. It has
 been created to conform to BagIt v0.96.
 
-Documentation is available at http://www.musiclibs.net. Code hosting is available on GitHub at http://github.com/ahankinson/pybagit/.
+Documentation is available at http://www.musiclibs.net/pybagit. 
+Code hosting is available on GitHub at http://github.com/ahankinson/pybagit/.
 
 Requirements
 ------------
