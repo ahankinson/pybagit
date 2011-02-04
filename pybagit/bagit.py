@@ -40,6 +40,15 @@ import urllib
 # import bagit-specific exceptions.
 from pybagit.exceptions import *
 
+try:
+    import pp
+    PARALLEL_PROCESSING = True
+except ImportError:
+    PARALLEL_PROCESSING = False
+    import warnings
+    warnings.simplefilter("once")
+    warnings.warn("Parallel Processing not possible", ImportWarning)
+    
 class BagIt:    
     def __init__(self, bag, validate=False, extended=True, fetch=False):
         """ Creates a Bag object. If file doesn't exist, it initializes an 
