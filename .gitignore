@@ -5,3 +5,5 @@
 *.pyc
 dist/*
 build/*
+
+pybagit.egg-info
