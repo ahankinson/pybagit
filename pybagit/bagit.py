@@ -439,7 +439,7 @@ class BagIt:
             binfofile.close()
             self._read_baginfo_to_dict()
         
-    def _calculate_checksum(self, file):
+    def _calculate_checksum(self, filepath):
         """ Taken from 
             http://abstracthack.wordpress.com/2007/10/19/calculating-md5-checksum/
         """
@@ -450,7 +450,8 @@ class BagIt:
         def upd(m, data):
             m.update(data)
             return m
-        fd = open(file, 'rb')
+        fd = open(filepath, 'rb')
+        
         try:
             contents = iter(lambda: fd.read(block_size), "")
             m = reduce(upd, contents, hashalg)
