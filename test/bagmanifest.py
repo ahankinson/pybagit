@@ -27,11 +27,11 @@ class ManifestTest(unittest.TestCase):
         self.assertEquals(self.bag.manifest_contents['data/subdir/subsubdir/angry.jpg'],
                 '5f294603675cb6c0f83cef9316bb5be7')
     
-    def test_sha1_manifest(self):
-        self.bag.set_hash_encoding('sha1')
-        self.bag.update()
-        self.assertEquals(os.path.basename(self.bag.manifest_file),
-                'manifest-sha1.txt')
+    # def test_sha1_manifest(self):
+    #     self.bag.set_hash_encoding('sha1')
+    #     self.bag.update()
+    #     self.assertEquals(os.path.basename(self.bag.manifest_file),
+    #             'manifest-sha1.txt')
     
     def test_md5_manifest(self):
         self.bag.set_hash_encoding('md5')
