@@ -29,7 +29,7 @@ class FetchTest(unittest.TestCase):
     def test_can_fetch_and_validate(self):
         self.bag.fetch(validate_downloads=True)
         self.assertEquals(self.bag.manifest_contents['data/bagitspec.pdf'],
-            '7d19e9a554d59028241003868c1e61afee6d3c12')
+            'ea3ff12bfa706fb494a2fca5af6134e44f199f92')
             
     def set_fetch_contents(self):
         self.bag.add_fetch_entries([{'url': 'http://icanhascheezburger.files.wordpress.com/2007/06/stealing_my_bag.jpg', 

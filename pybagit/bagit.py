@@ -241,93 +241,46 @@ class BagIt:
             manifest, and removes any files from the manifest that it does not
             find in the directory.
         """
-        files = os.listdir(self.bag_directory)
-        for e in ('fetch.txt', 'bag-info.txt', "tagmanifest-{0}.txt".format(self.hash_encoding)):
-            if e in files:
-                self.extended = True
-            else:
-                self.extended = False
-                
+        
+        # clean up any old manifest files. We'll be regenerating them later.
+        filelist = os.listdir(self.bag_directory)
+        tagmanifests = [f for f in filelist if re.match(r"^tagmanifest-(sha1|md5)\.txt", f)]
+        datamanifests = [f for f in filelist if re.match(r"^manifest-(sha1|md5)\.txt", f)]
+        old_manifests = tagmanifests + datamanifests
+        for man in old_manifests:
+            os.unlink(os.path.join(self.bag_directory, man))
+            
         # Sanitize Data Directory.
-        data = os.walk(self.data_directory)
-        for dir in data:
-            for file in dir[2]:
-                newfile = self._sanitize_filename(file)
-                if cmp(newfile, file) == 1:
-                    os.rename(os.path.join(dir[0], file), os.path.join(dir[0], newfile))
+        for dirpath, dirname, fnames in os.walk(self.data_directory):
+            for fname in fnames:
+                newfile = self._sanitize_filename(fname)
+                if newfile != fname:
+                    os.rename(os.path.join(dirpath, fname), os.path.join(dirpath, newfile))
         
+        # checksum the data directory
+        cmd = [self._path_to_multichecksum, "-a", self.hash_encoding, "-c", self.tag_file_encoding, self.data_directory]
+        p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         
-        # Update Checksums
-        # data_dir = []
-        # data = os.walk(self.data_directory)
-        # for dir in data:
-        #     for file in dir[2]:
-        #         csum = self._calculate_checksum(os.path.join(dir[0], file))
-        #         relpath = os.path.relpath(os.path.join(dir[0], file), self.bag_directory)
-        #         # this will help our next step. While were iterating, we might
-        #         # as well populate a list of the files in the data dir.
-        #         data_dir.append(relpath)
-        #         
-        #         if relpath in self.manifest_contents:
-        #             if cmp(self.manifest_contents[relpath], csum) == 0:
-        #                 continue
-        #             else:
-        #                 self.manifest_contents[relpath] = csum
-        #         else:
-        #             self.manifest_contents[relpath] = csum
-        #         
-        # # we'll be popping stuff out of the real manifest, so we'll iterate
-        # # over a copy.
-        # man_contents = self.manifest_contents.copy()
-        # for k,v in man_contents.iteritems():
-        #     if k not in data_dir: # k = data directory path
-        #         del self.manifest_contents[k] # delete the checksum and file from the manifest
-                
-        # we'll write the manifest to the manifest file, but then 
-        # immediately after we'll read in the new version. This ensures
-        # our instance manifest is always the latest version.
-        # self._write_dict_to_manifest()
+        while p.returncode is None:
+            time.sleep(0.1)
+            p.poll()
         
-        cmd = [self._path_to_multichecksum, "-a", self.hash_encoding, "-c", self.tag_file_encoding, 
-                self.manifest_file, self.data_directory]
-        p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
-        
+        # read in the manifest to an instance variable
         self._read_manifest_to_dict()
         
-        # If we end up with two manifest files, we'll delete the one that 
-        # isn't the one that uses the hash.
-        filelist = os.listdir(self.bag_directory)
-        manifest = filter(lambda f: re.match(r"^manifest-(sha1|md5)\.txt", f), filelist) # search for the right manifest file.
-        if len(manifest) > 1:
-            for file in manifest:
-                if file != os.path.basename(self.manifest_file):
-                    os.unlink(os.path.join(self.bag_directory, file))
+        # clean out any previous tag manifest contents.
+        self.tag_manifest_contents = {}
+        for f in ['bagit.txt', 'bag-info.txt', 'fetch.txt', self.manifest_file]:
+            csum = self._calculate_checksum(os.path.join(self.bag_directory, f))
+            relp = os.path.relpath(os.path.join(self.bag_directory, f), self.bag_directory)
+            self.tag_manifest_contents[relp] = csum
         
-        if self.extended:
-            # once we get done the updates, we'll update the checksums on the 
-            # tag manifests.
-            tagmanifest = filter(lambda f:re.match(r"^tagmanifest-(sha1|md5)\.txt", f), filelist)
-            if len(tagmanifest) > 1:
-                for f in tagmanifest:
-                    if f != os.path.basename(self.tag_manifest_file):
-                        os.unlink(os.path.join(self.bag_directory, f))
-            
-            for f in ['bagit.txt', 'bag-info.txt', 'fetch.txt', self.manifest_file]:
-                csum = self._calculate_checksum(os.path.join(self.bag_directory, f))
-                relp = os.path.relpath(os.path.join(self.bag_directory, f), self.bag_directory)
-                self.tag_manifest_contents[relp] = csum
-            
-            self._write_dict_to_manifest(mode='t')
-            self._read_manifest_to_dict(mode='t')
-                
-            # for f in filelist:
-            #     if f in tagmanifest:
-            #         # we can't checksum ourself, so we'll move on.
-            #         continue
-            # if os.path.isfile(os.path.join(self.bag_directory, file)):
-            # csum = self._calculate_checksum(os.path.join(self.bag_directory, file))
-            # relp = os.path.relpath(os.path.join(self.bag_directory, file), self.bag_directory)
-                    
+        # write out the tag manifest
+        self._write_dict_to_manifest(mode="t")
+        
+        # read it back in
+        self._read_manifest_to_dict(mode="t")
+        
     def fetch(self, validate_downloads=False):
         """ Downloads files into the data directory.
         
@@ -494,45 +447,38 @@ class BagIt:
         filelist = os.listdir(self.bag_directory)
         
         if len(filelist) > 0:
-            manifest = filter(lambda f: re.match(r"^manifest-(sha1|md5)\.txt", f), filelist)[0] # search for the right manifest file.
-            self.hash_encoding = unicode(re.search(r"(?P<encoding>(sha1|md5))", manifest).group('encoding'))
-            try:
-                self.manifest_file = os.path.join(self.bag_directory, manifest)
-                self._read_manifest_to_dict()
-            except:
-                self.bag_errors.append(('manifest', 'Had problems reading the manifest file.'))
-        try:
+            manifest = filter(lambda f: re.match(r"^manifest-(sha1|md5)\.txt", f), filelist) # search for the right manifest file.
+            if manifest:
+                try:
+                    self.hash_encoding = unicode(re.search(r"(?P<encoding>(sha1|md5))", manifest[0]).group('encoding'))
+                    self.manifest_file = os.path.join(self.bag_directory, manifest[0])
+                    self._read_manifest_to_dict()
+                except:
+                    self.bag_errors.append(('manifest', 'Had problems reading the manifest file.'))
+                    
             self.data_directory = os.path.join(self.bag_directory, 'data')
-        except:
-            self.bag_errors.append(('data', 'Could not find the data directory.'))
             
-        for e in ('fetch.txt', 'bag-info.txt', "tagmanifest-{0}.txt".format(self.hash_encoding)):
-            if e in filelist:
-                self.extended = True
-            else:
-                self.extended = False
-        
-        if self.extended:
-            tmanifest = filter(lambda f: re.match(r"^tagmanifest-(sha1|md5)\.txt", f), filelist)[0] # search for the right manifest file.
-            try:
-                self.tag_manifest_file = os.path.join(self.bag_directory, tmanifest)
-                self._read_manifest_to_dict(mode='t')
-            except:
-                pass
+            tmanifest = filter(lambda f: re.match(r"^tagmanifest-(sha1|md5)\.txt", f), filelist)# search for the right manifest file.
+            if tmanifest:
+                try:
+                    self.tag_manifest_file = os.path.join(self.bag_directory, tmanifest[0])
+                    self._read_manifest_to_dict(mode='t')
+                except:
+                    self.bag_errors.append(('tagmanifest', 'Had problems reading the tagmanifest file.'))
             
             if os.path.exists(os.path.join(self.bag_directory, 'fetch.txt')):
                 try:
                     self.fetch_file = os.path.join(self.bag_directory, 'fetch.txt')
                     self._read_fetch_to_list()
                 except:
-                    pass
+                    self.bag_errors.append(('fetch', 'Had problems reading fetching the files.'))
             
             if os.path.exists(os.path.join(self.bag_directory, 'bag-info.txt')):
                 try:
                     self.baginfo_file = os.path.join(self.bag_directory, 'bag-info.txt')
                     self._read_baginfo_to_dict()
                 except:
-                    pass
+                    self.bag_errors.append(('baginfo', 'Had problems reading the bag info file.'))
         
     def _is_compressed(self):
         """ returns true if the bag is compressed; false if not."""
@@ -664,7 +610,14 @@ class BagIt:
             
         self.baginfo_contents = bag_info
     
+    def _update_manifest_filenames(self):
+        self.manifest_file = os.path.join(self.bag_directory, "manifest-{0}.txt".format(self.hash_encoding))
+        self.tag_manifest_file = os.path.join(self.bag_directory, "tagmanifest-{0}.txt".format(self.hash_encoding))
+    
     def _write_dict_to_manifest(self, mode="d"):
+        # ensure we're working with the latest files.
+        self._update_manifest_filenames()
+        
         if mode == "d":
             mparse = self.manifest_file
             contents = self.manifest_contents
@@ -692,12 +645,14 @@ class BagIt:
             *PHEW!* """
         
         keylen = '40' if self.hash_encoding == u'sha1' else '32'
+        
+        # ensure we're always getting the latest file.
+        self._update_manifest_filenames()
+        
         if mode == "d":
             mparse = self.manifest_file
         elif mode == "t":
             mparse = self.tag_manifest_file
-        
-        print os.path.exists(self.manifest_file)
         
         mfile = codecs.open(mparse, 'r', self.tag_file_encoding)
         mcontents = mfile.readlines()

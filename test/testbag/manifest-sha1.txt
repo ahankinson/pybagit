@@ -1,9 +1,5 @@
-df2fbeb1400acda0909a32c1cf6bf492f1121e07 data/.DS_Store
-df2fbeb1400acda0909a32c1cf6bf492f1121e07 data/emptydir2/.DS_Store
-df2fbeb1400acda0909a32c1cf6bf492f1121e07 data/subdir/subsubdir/.DS_Store
+ea3ff12bfa706fb494a2fca5af6134e44f199f92 data/bagitspec.pdf
+da39a3ee5e6b4b0d3255bfef95601890afd80709 data/emptydir1/.keep
 da39a3ee5e6b4b0d3255bfef95601890afd80709 data/emptydir2/.keep
 1090d8ef85f1500775cee20366604126ef82291b data/subdir/random_image.png
 c5913ae67aa40398f1182e52d2fa2c2e4c08f696 data/subdir/subsubdir/angry.jpg
-4791660e83c5441bf590fd6d538f785b71e4c2ed data/bagitspec.pdf
-da39a3ee5e6b4b0d3255bfef95601890afd80709 data/emptydir1/.keep
-df2fbeb1400acda0909a32c1cf6bf492f1121e07 data/subdir/.DS_Store

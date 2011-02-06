@@ -5,27 +5,34 @@ from optparse import OptionParser
 import os, sys
 import hashlib
 import codecs
-
+import time
 from pybagit.exceptions import *
 
 # declare a default hashalgorithm
-HASHALG = 'md5'
+HASHALG = 'sha1'
 ENCODING = "utf-8"
 
-def write_manifest(manfile, datadir, encoding):
-    bag_root = os.path.split(os.path.abspath(manfile))[0]
+def write_manifest(datadir, encoding):
+    bag_root = os.path.split(os.path.abspath(datadir))[0]
+    
+    manifest_file = "manifest-{0}.txt".format(HASHALG)
+    
     p = multiprocessing.Pool(processes=multiprocessing.cpu_count())
-    mfile = codecs.open(manfile, 'w', encoding)
-    for csum, cfile in p.map(csumfile, dirwalk(datadir)):
-        mfile.write("{0} {1}\n".format(csum, os.path.relpath(cfile, bag_root)))
+    mapresult = p.map_async(csumfile, dirwalk(datadir)).get()
     p.close()
     p.join()
+    
+    mfile = codecs.open(os.path.join(bag_root, manifest_file), 'w', encoding)
+    for csum,cfile in mapresult:
+        mfile.write("{0} {1}\n".format(csum, os.path.relpath(cfile, bag_root)))
     mfile.close()
     
 def dirwalk(datadir):
+    datafiles = []
     for dirpath, dirnames, filenames in os.walk(datadir):
         for fn in filenames:
-            yield os.path.join(dirpath, fn)
+            datafiles.append(os.path.join(dirpath, fn))
+    return datafiles
 
 def csumfile(filename):
     """ Based on 
@@ -64,9 +71,7 @@ if __name__ == "__main__":
     if options.encoding:
         ENCODING = options.encoding
     
-    if len(args) < 2:
-        parser.error("You must specify both a manifest file and a data directory")
-    
-    write_manifest(args[0], args[1], ENCODING)
-    sys.exit(0)
+    if len(args) < 1:
+        parser.error("You must specify a data directory")
+    write_manifest(args[0], ENCODING)
     
