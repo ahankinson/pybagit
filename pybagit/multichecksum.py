@@ -18,6 +18,8 @@ def write_manifest(manfile, datadir, encoding):
     mfile = codecs.open(manfile, 'w', encoding)
     for csum, cfile in p.map(csumfile, dirwalk(datadir)):
         mfile.write("{0} {1}\n".format(csum, os.path.relpath(cfile, bag_root)))
+    p.close()
+    p.join()
     mfile.close()
     
 def dirwalk(datadir):
@@ -29,7 +31,6 @@ def csumfile(filename):
     """ Based on 
         http://abstracthack.wordpress.com/2007/10/19/calculating-md5-checksum/
     """
-    
     hashalg = getattr(hashlib, HASHALG)() # == 'hashlib.md5' or 'hashlib.sha1'
     blocksize = 0x10000
     
