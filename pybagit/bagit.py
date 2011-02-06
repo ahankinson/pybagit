@@ -290,8 +290,7 @@ class BagIt:
         
         cmd = [self._path_to_multichecksum, "-a", self.hash_encoding, "-c", self.tag_file_encoding, 
                 self.manifest_file, self.data_directory]
-        p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True).communicate()
-        (stdout,stdin) = (p.stdout, p.stdin)
+        p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
         
         self._read_manifest_to_dict()
         
