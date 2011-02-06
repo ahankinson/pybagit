@@ -3,7 +3,7 @@
 *.swp
 *.out
 *.pyc
-dist/*
-build/*
+dist/
+build/
 
 pybagit.egg-info

@@ -1,4 +1,4 @@
-PyBagIt Version 1.0
+PyBagIt Version 1.5
 
 This module helps with creating an managing BagIt-compliant packages. It has
 been created to conform to BagIt v0.96.

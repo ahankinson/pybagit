@@ -3,8 +3,3 @@ Authors:
     Distributed Digital Music Archives & Libraries Lab,
     Schulich School of Music, McGill University
     Montreal, QC, Canada.
-    
-    First release.
-
-Contributors:
-    Your Name Here!

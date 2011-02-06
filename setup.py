@@ -6,7 +6,7 @@ except ImportError:
     from setuptools import setup, find_packages
 
 longdesc = """
-PyBagIt Version 1.0
+PyBagIt Version 1.5
 
 This module helps with creating an managing BagIt-compliant packages. It has
 been created to conform to BagIt v0.96.
@@ -16,7 +16,7 @@ Code hosting is available on GitHub at http://github.com/ahankinson/pybagit/.
 
 Requirements
 ------------
-Tested with Python 2.6+ (2.5 or lower will probably not work.)
+Tested with Python 2.6+ (2.5 or lower will not work.)
 No external modules required.
 Module has not been tested on Windows.
 
@@ -51,13 +51,13 @@ easy_install pybagit
 setup(
     name = 'pybagit',
     long_description = longdesc,
-    version = '1.0.1',
+    version = '1.5.0',
     url = 'http://www.musiclibs.net/pybagit',
     author = 'Andrew Hankinson',
     author_email = 'andrew.hankinson@mail.mcgill.ca',
     license = 'http://www.opensource.org/licenses/mit-license.php',
     packages = find_packages(exclude=['ez_setup']),
-    classifiers = [ 'Development Status :: 4 - Beta',
+    classifiers = [ 'Development Status :: 5 - Production/Stable',
                     'Intended Audience :: Information Technology',
                     'License :: OSI Approved :: MIT License', 
                     'Operating System :: OS Independent',
