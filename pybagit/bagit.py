@@ -24,31 +24,26 @@ __license__ = """The MIT License
                 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
                 THE SOFTWARE."""
 
-import sys, os
-import re
+import subprocess
 import tempfile
 import hashlib
 import logging
 import zipfile
 import tarfile
+import sys, os
 import shutil
 import codecs
 import string
 import random
 import urllib
+import re
+
+import time
+
 
 # import bagit-specific exceptions.
 from pybagit.exceptions import *
 
-try:
-    import pp
-    PARALLEL_PROCESSING = True
-except ImportError:
-    PARALLEL_PROCESSING = False
-    import warnings
-    warnings.simplefilter("once")
-    warnings.warn("Parallel Processing not possible", ImportWarning)
-    
 class BagIt:    
     def __init__(self, bag, validate=False, extended=True, fetch=False):
         """ Creates a Bag object. If file doesn't exist, it initializes an 
@@ -81,6 +76,11 @@ class BagIt:
         self.baginfo_contents  = None
         self.bag_compression   = None # compression type (if any)
         self.bag_errors        = [] # list of bag validation errors
+        
+        
+        module_path = os.path.dirname(os.path.abspath(__file__))
+        self._path_to_multichecksum = os.path.join(module_path, "multichecksum.py")
+        
         
         try:
             if os.path.exists(self._bag):
@@ -258,35 +258,41 @@ class BagIt:
         
         
         # Update Checksums
-        data_dir = []
-        data = os.walk(self.data_directory)
-        for dir in data:
-            for file in dir[2]:
-                csum = self._calculate_checksum(os.path.join(dir[0], file))
-                relpath = os.path.relpath(os.path.join(dir[0], file), self.bag_directory)
-                # this will help our next step. While were iterating, we might
-                # as well populate a list of the files in the data dir.
-                data_dir.append(relpath)
-                
-                if relpath in self.manifest_contents:
-                    if cmp(self.manifest_contents[relpath], csum) == 0:
-                        continue
-                    else:
-                        self.manifest_contents[relpath] = csum
-                else:
-                    self.manifest_contents[relpath] = csum
-                
-        # we'll be popping stuff out of the real manifest, so we'll iterate
-        # over a copy.
-        man_contents = self.manifest_contents.copy()
-        for k,v in man_contents.iteritems():
-            if k not in data_dir: # k = data directory path
-                del self.manifest_contents[k] # delete the checksum and file from the manifest
+        # data_dir = []
+        # data = os.walk(self.data_directory)
+        # for dir in data:
+        #     for file in dir[2]:
+        #         csum = self._calculate_checksum(os.path.join(dir[0], file))
+        #         relpath = os.path.relpath(os.path.join(dir[0], file), self.bag_directory)
+        #         # this will help our next step. While were iterating, we might
+        #         # as well populate a list of the files in the data dir.
+        #         data_dir.append(relpath)
+        #         
+        #         if relpath in self.manifest_contents:
+        #             if cmp(self.manifest_contents[relpath], csum) == 0:
+        #                 continue
+        #             else:
+        #                 self.manifest_contents[relpath] = csum
+        #         else:
+        #             self.manifest_contents[relpath] = csum
+        #         
+        # # we'll be popping stuff out of the real manifest, so we'll iterate
+        # # over a copy.
+        # man_contents = self.manifest_contents.copy()
+        # for k,v in man_contents.iteritems():
+        #     if k not in data_dir: # k = data directory path
+        #         del self.manifest_contents[k] # delete the checksum and file from the manifest
                 
         # we'll write the manifest to the manifest file, but then 
         # immediately after we'll read in the new version. This ensures
         # our instance manifest is always the latest version.
-        self._write_dict_to_manifest()
+        # self._write_dict_to_manifest()
+        
+        cmd = [self._path_to_multichecksum, "-a", self.hash_encoding, "-c", self.tag_file_encoding, 
+                self.manifest_file, self.data_directory]
+        p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True).communicate()
+        (stdout,stdin) = (p.stdout, p.stdin)
+        
         self._read_manifest_to_dict()
         
         # If we end up with two manifest files, we'll delete the one that 
@@ -691,7 +697,9 @@ class BagIt:
             mparse = self.manifest_file
         elif mode == "t":
             mparse = self.tag_manifest_file
-            
+        
+        print os.path.exists(self.manifest_file)
+        
         mfile = codecs.open(mparse, 'r', self.tag_file_encoding)
         mcontents = mfile.readlines()
         mfile.close()
