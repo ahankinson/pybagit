@@ -1,8 +1,8 @@
 """ Read and create BagIt files. """
 
 __author__ = "Andrew Hankinson (andrew.hankinson@mail.mcgill.ca)"
-__version__ = "1.0"
-__date__ = "2010"
+__version__ = "1.5"
+__date__ = "2011"
 __copyright__ = "Creative Commons Attribution"
 __license__ = """The MIT License
 

@@ -1,2 +1,0 @@
-TODO:
- - Add threading to the Checksum and Fetch functions to allow parallel processing
