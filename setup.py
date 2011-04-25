@@ -51,7 +51,7 @@ easy_install pybagit
 setup(
     name = 'pybagit',
     long_description = longdesc,
-    version = '1.5.0',
+    version = '1.5.1',
     url = 'http://www.musiclibs.net/pybagit',
     author = 'Andrew Hankinson',
     author_email = 'andrew.hankinson@mail.mcgill.ca',
