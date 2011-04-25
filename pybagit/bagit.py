@@ -259,7 +259,7 @@ class BagIt:
                     os.rename(os.path.join(dirpath, fname), os.path.join(dirpath, newfile))
         
         # checksum the data directory
-        cmd = [self._path_to_multichecksum, "-a", self.hash_encoding, "-c", self.tag_file_encoding, self.data_directory]
+        cmd = [sys.executable, self._path_to_multichecksum, "-a", self.hash_encoding, "-c", self.tag_file_encoding, self.data_directory]
         p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         
         while p.returncode is None:
