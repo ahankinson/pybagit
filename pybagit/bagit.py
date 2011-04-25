@@ -76,6 +76,7 @@ class BagIt:
         self.baginfo_contents  = None
         self.bag_compression   = None # compression type (if any)
         self.bag_errors        = [] # list of bag validation errors
+        self.platform          = sys.platform # set the platform value.
         
         
         module_path = os.path.dirname(os.path.abspath(__file__))
@@ -561,7 +562,8 @@ class BagIt:
         try:
             for it in fcontents:
                 url,length,filename = it.split(" ")
-                line = {'url': url.strip(), 'length': length.strip(), 'filename': filename.strip() }
+                fname = os.path.normpath(filename.strip())
+                line = {'url': url.strip(), 'length': length.strip(), 'filename': fname }
                 fetch.append(line)
             self.fetch_contents = fetch
         except Exception,e:
@@ -577,7 +579,7 @@ class BagIt:
         for item in self.fetch_contents: # fetch_contents is a list, not a dictionary!
             line = "{url} {length} {filename}\n".format(url=item['url'], 
                                                         length='-', 
-                                                        filename=item['filename'])
+                                                        filename=self._ensure_unix_pathname(item['filename']))
             ffile.write(line)
         ffile.close()
         
@@ -627,6 +629,13 @@ class BagIt:
             
         mfile = codecs.open(mparse, 'w', self.tag_file_encoding)
         for k,v in contents.iteritems():
+            
+            # unix pathnames are the only ones acceptable in a manifest file.
+            # this will ensure that if we're on Windows, we're still writing 
+            # unix/style/pathnames, even though the manifest contains windows\style\pathnames.
+            if self.platform == "win32":
+                k = self._ensure_unix_pathname(k)
+            
             # we write this to the manifest reversing the checksum & path.
             mfile.write("{0} {1}\n".format(v,k))
         mfile.close()
@@ -670,6 +679,13 @@ class BagIt:
                 # clean up the entries: discard empty items and strip whitespace
                 # from the beginning of the file path.
                 v,k = [x.lstrip().rstrip() for x in ent if len(x) != 0]
+                
+                # for Windows compatibility when *reading* a bag we need to ensure 
+                # that it can resolve the paths. This will set any forward slashes to back
+                # slashes so that Windows can figure out where the file is.
+                if self.platform == "win32":
+                    k = os.path.normpath(k)
+                
                 manifest[k] = v
                 
         if mode == "d":
@@ -711,3 +727,14 @@ class BagIt:
         rem_filename = re.sub(remove, "", rep_filename)
         clean_filename = "".join((rem_filename, ext_fname))
         return clean_filename
+    
+    def self._ensure_unix_pathname(pathname):
+        # it's only windows we have to worry about
+        if self.platform != "win32":
+            return pathname
+        replace = re.compile(r"\\")
+        fnm = re.sub(replace, "/", pathname)
+        return fnm
+        
+        
+    
