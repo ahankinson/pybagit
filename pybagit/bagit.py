@@ -728,7 +728,7 @@ class BagIt:
         clean_filename = "".join((rem_filename, ext_fname))
         return clean_filename
     
-    def self._ensure_unix_pathname(pathname):
+    def _ensure_unix_pathname(pathname):
         # it's only windows we have to worry about
         if self.platform != "win32":
             return pathname

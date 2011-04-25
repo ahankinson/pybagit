@@ -1,2 +1,3 @@
 2010-02-24  1.0 Initial Release.
 2011-02-06  1.5 Added parallel checksum generation; fixed some bugs
+2011-04-25  1.5.1 Fixed windows pathname problem
