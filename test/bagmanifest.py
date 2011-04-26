@@ -5,6 +5,7 @@ from pybagit.bagit import BagIt
 class ManifestTest(unittest.TestCase):
     
     def setUp(self):
+        print "setting up manifest."
         self.bag = BagIt(os.path.join(os.getcwd(), 'test', 'testbag'))
     
     def set_hash_md5(self):

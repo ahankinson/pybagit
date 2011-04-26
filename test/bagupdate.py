@@ -5,6 +5,7 @@ from pybagit.bagit import BagIt
 class UpdateTest(unittest.TestCase):
     
     def setUp(self):
+        print "Setting up update."
         self.bag = BagIt(os.path.join(os.getcwd(), 'test', 'testbag'))
     
     def tearDown(self):

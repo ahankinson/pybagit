@@ -6,6 +6,7 @@ from pybagit.bagit import BagIt
 class CreateTest(unittest.TestCase):
     
     def setUp(self):
+        print "Setting up Create"
         pass
         
     def tearDown(self):

@@ -6,6 +6,7 @@ from pybagit.bagit import BagIt
 class CompressTest(unittest.TestCase):
     
     def setUp(self):
+        print "Setting up Compress"
         self.bag = BagIt(os.path.join(os.getcwd(), 'test', 'testbag'))
     
     def tearDown(self):

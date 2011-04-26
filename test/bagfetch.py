@@ -7,6 +7,7 @@ class FetchTest(unittest.TestCase):
     ### just comment this test out, or replace the assertion with a new
     ### SHA1 Checksum.
     def setUp(self):
+        print "Setting up Fetch."
         self.bag = BagIt(os.path.join(os.getcwd(), 'test', 'testbag'))
         self.test_fetch_contents = [{'filename': u'data/bagitspec.pdf',
           'length': u'-',
