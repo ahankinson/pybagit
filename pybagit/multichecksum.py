@@ -30,6 +30,7 @@ import os, sys
 import hashlib
 import codecs
 import time
+import re
 from pybagit.exceptions import *
 
 # declare a default hashalgorithm
@@ -48,7 +49,9 @@ def write_manifest(datadir, encoding):
     
     mfile = codecs.open(os.path.join(bag_root, manifest_file), 'w', encoding)
     for csum,cfile in mapresult:
-        mfile.write("{0} {1}\n".format(csum, os.path.relpath(cfile, bag_root)))
+        rp = os.path.relpath(cfile, bag_root)
+        fl = ensure_unix_pathname(rp)
+        mfile.write("{0} {1}\n".format(csum, fl))
     mfile.close()
     
 def dirwalk(datadir):
@@ -78,6 +81,14 @@ def csumfile(filename):
         fd.close()
     
     return (m.hexdigest(), filename)
+
+def ensure_unix_pathname(pathname):
+    # it's only windows we have to worry about
+    if sys.platform != "win32":
+        return pathname
+    replace = re.compile(r"\\")
+    fnm = re.sub(replace, "/", pathname)
+    return fnm
 
 
 if __name__ == "__main__":
