@@ -33,7 +33,7 @@ class FetchTest(unittest.TestCase):
             
     def set_fetch_contents(self):
         self.bag.add_fetch_entries([{'url': 'http://icanhascheezburger.files.wordpress.com/2007/06/stealing_my_bag.jpg', 
-                'filename': 'data/stealin_mah_bag.jpg'}])
+                'filename': os.path.join('data','stealin_mah_bag.jpg')}])
         self.assertTrue(os.path.exists(os.path.join(os.getcwd(), 'test', 'testbag', 'data', 'stealin_mah_bag.jpg')))
 
 def suite():
