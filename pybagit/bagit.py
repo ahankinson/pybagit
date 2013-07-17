@@ -97,7 +97,7 @@ class BagIt:
             
     def is_valid(self):
         """ Returns True if no validation errors have been reported."""
-        if len(self.bag_errors) > 0:
+        if len(self.bag_errors) == 0:
             return True
         else:
             return False
