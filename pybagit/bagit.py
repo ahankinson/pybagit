@@ -250,8 +250,13 @@ class BagIt:
         old_manifests = tagmanifests + datamanifests
         for man in old_manifests:
             os.unlink(os.path.join(self.bag_directory, man))
-            
-        # Sanitize Data Directory.
+        
+        # add an empty .keep file in empty directories.
+        for dirpath, dirname, fnames in os.walk(self.data_directory):
+            if not os.listdir(dirpath):
+                open(os.path.join(dirpath, '.keep'), 'w').close()
+
+        # Sanitize Data Directory
         for dirpath, dirname, fnames in os.walk(self.data_directory):
             for fname in fnames:
                 newfile = self._sanitize_filename(fname)
