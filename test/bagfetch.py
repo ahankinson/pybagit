@@ -11,13 +11,15 @@ class FetchTest(unittest.TestCase):
         self.bag = BagIt(os.path.join(os.getcwd(), 'test', 'testbag'))
         self.test_fetch_contents = [{'filename': u'data/bagitspec.pdf',
           'length': u'-',
-          'url': u'http://www.digitalpreservation.gov/library/resources/tools/docs/bagitspec.pdf'}]
+          'url': u'http://www.digitalpreservation.gov/documents/bagitspec.pdf'}]
     
     def tearDown(self):
         # if os.path.exists(os.path.join(os.getcwd(), 'test', 'testbag', 'data', 'bagitspec.pdf')):
         #     os.remove(os.path.join(os.getcwd(), 'test', 'testbag', 'data', 'bagitspec.pdf'))
         if os.path.exists(os.path.join(os.getcwd(), 'test', 'testbag', 'data', 'stealin_mah_bag.jpg')):
             os.remove(os.path.join(os.getcwd(), 'test', 'testbag', 'data', 'stealin_mah_bag.jpg'))
+        if os.path.exists(os.path.join(os.getcwd(), 'test', 'testbag', 'data', 'bagitspec.pdf')):
+            os.remove(os.path.join(os.getcwd(), 'test', 'testbag', 'data', 'bagitspec.pdf'))
         self.bag.add_fetch_entries(self.test_fetch_contents, append=False)
     
     def test_fetch_contents(self):
@@ -30,7 +32,7 @@ class FetchTest(unittest.TestCase):
     def test_can_fetch_and_validate(self):
         self.bag.fetch(validate_downloads=True)
         self.assertEquals(self.bag.manifest_contents['data/bagitspec.pdf'],
-            'ea3ff12bfa706fb494a2fca5af6134e44f199f92')
+            '4649c6540ac4e4dcf271ca236abfe62faa4d7f08')
             
     def set_fetch_contents(self):
         self.bag.add_fetch_entries([{'url': 'http://icanhascheezburger.files.wordpress.com/2007/06/stealing_my_bag.jpg', 
