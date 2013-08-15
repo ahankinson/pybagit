@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <style type="text/css" media="screen">
+        body {
+            font-family: "Helvetica Neue", Helvetica, sans-serif;
+        }
+        pre {
+            width: 80%;
+            padding: 10px;
+            border: 1px dotted #555;
+            background: #eee;
+        }
+        
+        code {
+            padding: 2px;
+            background: #E7FFB3;
+        }
+        
+        h2 {
+            padding: 4px;
+            background: #CEDEFF;
+            border-bottom: 1px solid #6F94B2;
+        }
+        
+    </style>
+    <title>PyBagIt 1.0 Documentation</title>
+    
+</head>
+
+<body>
+<h1>PyBagIt 1.0 Documentation</h1>
+<p>Project Website: <a href="http://www.musiclibs.net/pybagit">http://www.musiclibs.net/pybagit</a></p>
+<p>Code hosting: <a href="http://github.com/ahankinson/pybagit">http://github.com/ahankinson/pybagit</a></p>
+<p>BagIt 0.96 Spec: <a href="http://www.digitalpreservation.gov/library/resources/tools/docs/bagitspec.pdf">http://www.digitalpreservation.gov/library/resources/tools/docs/bagitspec.pdf</a></p>
+<p>This module simplifies creation and management of BagIt files. Version 1.0 of this module conforms to the BagIt v0.96 specification.</p>
+
+<p>This is a "loosely monitored" bag system. The constructor simply specifies a folder to monitor. Files can be added and removed from the data directory at will, and the <code>update()</code> method for that bag will automatically checksum and add all the appropriate files to the manifest files.</p>
+
+<p>See the <code>examples</code> directory in the source distribution for more information.</p>
+
+<h2>Constructor</h2>
+<code>pybagit.bagit.BagIt(self, bag, validate=False, extended=True, fetch=False)</code>
+<p>A bag instance is constructed by passing in either:
+    <ul>
+        <li>A non-existent folder name: This module will create a new bag structure at this location;</li>
+        <li>An existing folder name: This module will treat this folder as a bag hierarchy. <strong>Note:</strong> It will treat this as a bag, and create any missing required or extended files.</li>
+        <li>An existing compressed file: This module will un-compress this file to a temporary directory and operate on it there. <strong>Note:</strong> You should run the <code>package()</code> method on this bag once you are finished to save it to a permanent location once you have finished.
+    </ul>
+</p>
+<p>Optional parameters are:
+    <ul>
+        <li><code>validate</code>: If <code>True</code>, will run validate on the bag to check it for errors. Note that this will run the checksum on all files, so it may take a while if there are many files or they are especially big. Default is <code>False</code></li>
+        <li><code>extended</code>: If <code>True</code> it will ensure that the optional 'bag-info.txt', 'fetch.txt' and 'tagmanifest-(sha1|md5).txt' files are created. Default is <code>True</code></li>
+        <li><code>fetch</code>: If <code>True</code> it will download all the files specified in the 'fetch.txt' file. Default is <code>False</code>.
+    </ul>
+</p>
+            
+<h4>Example</h4>
+<pre>
+    import pybagit.bagit as b
+    
+    # path to non-existent folder. The bag structure will be created with the name "folder".
+    bag = b.BagIt('/path/to/non/existent/folder')
+    
+    # path to an existing folder. Upon running the update() method it will ensure that the bag is valid in the 'file'
+    bag = b.BagIt('/path/to/existing/folder')
+    
+    # path to an existing compressed file. 'tgz' and 'zip' are supported.
+    bag = b.BagIt('/path/to/file.tgz')
+    
+    # optional parameters. 
+    # Creates a minimal bag instance.
+    bag = b.BagIt('/path/to/folder', extended=False)
+    
+    # Validates a bag's structure
+    bag = b.BagIt('/path/to/folder', validate=True)
+    
+    # Fetches files
+    bag = b.BagIt('/path/to/folder', fetch=True)
+</pre>
+
+<h2>Public Methods</h2>
+<h3><code>instance.is_valid()</code></h3>
+<p>Returns <code>True</code> if there are no validation errors reported.</p>
+
+<h3><code>instance.is_extended()</code></h3>
+<p>Returns <code>True</code> if the bag contains the optional files 'bag-info.txt', 'fetch.txt', or 'tagmanifest-(sha1|md5).txt'</p>
+
+<h3><code>instance.get_bag_info()</code></h3>
+<p>Returns a dictionary containing:
+    <ul>
+        <li><code>version</code>: The Bag's version, as reported in 'bagit.txt'</li>
+        <li><code>encoding</code>: The Bag's tag files encoding, e.g. 'utf-8'</li>
+        <li><code>hash</code>: The Bag's checksum algorightm, e.g. 'sha1'</li>
+    </ul>
+</p>
+
+<h3><code>instance.get_data_directory()</code></h3>
+<p>Returns the absolute path to the bag's data directory.</p>
+
+<h3><code>instance.get_hash_encoding()</code></h3>
+<p>Returns the bag's checksum encoding scheme.</p>
+
+<h3><code>instance.set_hash_encoding(algorithm)</code></h3>
+<p>Sets the bag's checksum hash algorithm. Must be either <code>sha1</code> or <code>md5</code>.</p>
+
+<h3><code>instance.show_bag_info()</code></h3>
+<p>Prints a number of bag properties, e.g.</p>
+<pre>
+Bag Version: 0.96
+Tag File Encoding: utf-8
+Bag Type: Extended
+
+                    Manifest Contents
+CHECKSUMS                                 FILENAMES
+    ------------------------------------------------------------------------------
+422936e456d17cf39341598ca377cbc5dd049364  data/subdir/subsubdir4/testfile.txt
+ab2903263a468a76615a363cea207b0bc87b0449  data/subdir/subsubdir1/testfile.txt
+05b920f51b05bb135c9e9f2d69650384216e7cdc  data/subdir/subsubdir3/testfile.txt
+0b3394596f8f1429efa019016207ad9b61d1c573  data/subdir/subsubdir2/testfile.txt
+
+                    Tag Manifest Contents
+CHECKSUMS                                 FILENAMES
+    ------------------------------------------------------------------------------
+b73a8865fbaa633ebeb283828d7986420135db47  manifest-sha1.txt
+da39a3ee5e6b4b0d3255bfef95601890afd80709  bag-info.txt
+da39a3ee5e6b4b0d3255bfef95601890afd80709  fetch.txt
+a7b95616bf7307fc398baeb04ce60a88ed370f51  bagit.txt
+
+Bag Errors
+--------------------------------------------------
+No Errors.
+</pre>
+<h3><code>instance.get_bag_contents()</code></h3>
+<p>Returns a list with the absolute paths of all the files in the data directory.</p>
+
+<h3><code>instance.get_bag_errors(validate=False)</code></h3>
+<p>Returns a list of all the bag errors. If <code>validate=True</code> it will run the <code>validate()</code> method to verify the integrity first.</p>
+
+<h3><code>instance.validate()</code></h3>
+<p>Runs the bag validator on the contents of the bag. This method:
+    <ul>
+        <li>Verifies the presence of required files and folders.</li>
+        <li>Verifies that the checksums for each file matches the checksum listed for that file in the manifest</li>
+    </ul>
+</p>
+
+<h3><code>instance.update()</code></h3>
+<p>This method is used whenever something has been added or removed from the bag. It contains many sub-processes for ensuring a valid bag is produced:
+    <ul>
+        <li>Ensures that the required files are present</li>
+        <li>'Sanitizes' the filenames, removing spaces and "forbidden" file names (see the BagIt spec for more detail)</li>
+        <li>Ensures the Checksums as listed in the manifest file are valid</li>
+        <li>Adds any new checksums and file entries to the manifest file for any new files it encounters</li>
+        <li>Removes any checksums and file entries for files that have been deleted from the data directory</li>
+        <li>If it is an extended bag, ensures that the tag files are listed and checksummed in the tagmanifest file.</li>
+    </ul>
+</p>
+
+<h3><code>instance.fetch(validate_downloads=False)</code></h3>
+<p>Downloads every entry in the fetch.txt file. If <code>validate_downloads=True</code> it will run the <code>update()</code> and <code>validate()</code> methods automatically.</p>
+
+<h3><code>instance.add_fetch_entries(fetch_entries, append=True)</code></h3>
+<p>Writes new entries to the fetch.txt file. <code>fetch_entries</code> is a list containing the URL and the path <em>relative to the data directory</em> for the file. For example:</p>
+<pre>
+    entries = [{'url':'http://www.example.com/path/to/file1.txt', 
+            'filename':'data/path/to/file.txt'},    
+            {'url':'http://www.example.com/path/to/file2.txt', 
+            'filename':'data/another/path/for/file.txt'}]
+    
+    bag.add_fetch_entries(entries)
+</pre>
+<p>If <code>append=False</code> the whole fetch.txt file is overwritten with the entries; if <code>append=True</code> it will be added to the existing entries.</p>
+
+<h3><code>instance.package(destination, method="tgz")</code></h3>
+<p>Compresses a bag and copies it to <code>destination</code>. <code>method</code> can be either "tgz" (default) or "zip". <strong>Note:</strong> Files with tgz compression are saved with the ".tgz" extension, <em>not</em> a tar.gz extension.</p>
+
+<h2>Public Properties</h2>
+<p><strong>Note:</strong> These properties are exposed for convenience, but you <strong>should not</strong> set any properties by changing these. Properties that can be changed have appropriate <code>set_...()</code> methods. (c.f. <code>set_hash_encoding()</code>). All others are maintained by the state of the files in the bag itself and are verified when <code>update()</code> is called.</p>
+<h3><code>instance.bag_directory</code></h3>    
+<p>Absolute path to the bag directory</p>
+<h3><code>instance.extended</code></h3>
+<p><code>True</code> if the bag is extended; <code>False</code> if not.
+<h3><code>instance.hash_encoding</code></h3>
+<p><code>sha1</code> or <code>md5</code>. Default is <code>sha1</code>
+<h3><code>instance.bag_major_version</code></h3>
+<p>Returns the major version number as declared in bagit.txt. Any files created by this package will be default to v0.96, so this property would return 0.</p>
+<h3><code>instance.bag_minor_version</code></h3>
+<p>Returns the minor version number as declared in bagit.txt. Any files created by this package will be default to v0.96, so this property would return 96.</p>
+<h3><code>instance.tag_file_encoding</code></h3> 
+<p>Returns the tag file encoding as declared in bagit.txt. Any files created by this package will default to utf-8.</p>
+<h3><code>instance.data_directory</code></h3>
+<p>Absolute path to the bag's data directory.</p>    
+<h3><code>instance.bagit_file</code></h3>
+<p>Absolute path to the bagit.txt file.</p>        
+<h3><code>instance.manifest_file</code></h3>
+<p>Absolute path to the manifest-(sha1|md5).txt file.</p>
+<h3><code>instance.tag_manifest_file</code></h3>
+<p>Absolute path to the tagmanifest-(sha1|md5).txt file. <code>None</code> if it doesn't exist.</p>
+<h3><code>instance.fetch_file</code></h3>
+<p>Absolute path to the fetch.txt file. <code>None</code> if it doesn't exist.</p>
+<h3><code>instance.baginfo_file</code></h3>
+<p>Absolute path to the bag-info.txt file. <code>None</code> if it doesn't exist.</p>      
+<h3><code>instance.manifest_contents</code></h3>
+<p>A dictionary containing the manifest file contents.</p>
+<h3><code>instance.tag_manifest_contents</code></h3>
+<p>A dictionary containing the tagmanifest file contents</p>
+<h3><code>instance.fetch_contents</code></h3>
+<p>A dictionary containing the fetch.txt file contents</p>
+<h3><code>instance.baginfo_contents</code></h3>
+<p>A dictionary containing the bag-info.txt file contents</p>
+<h3><code>instance.bag_compression</code></h3>
+<p>If the bag originates from a compressed file, this is set to either <code>tgz</code> or <code>zip</code>. <code>None</code> if the bag is not compressed. <strong>Note:</strong> This property does not determine the subsequent bag compression format. If the file originates from a zipfile and <code>package()</code> is called without <code>method="zip"</code> it will return a .tgz file.</p>
+<h3><code>instance.bag_errors</code></h3>
+<p>A list of all bag validation errors. All errors are in tuple format, e.g.:</p>
+<pre>
+    ('data/path/to/file.txt', 'Incorrect filename or checksum in manifest')
+</pre>
+</body>
+</html>
