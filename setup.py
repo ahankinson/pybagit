@@ -11,7 +11,7 @@ PyBagIt Version 1.5
 This module helps with creating an managing BagIt-compliant packages. It has
 been created to conform to BagIt v0.96.
 
-Documentation is available at http://www.musiclibs.net/pybagit. 
+Documentation is available at http://ahankinson.github.io/pybagit.
 Code hosting is available on GitHub at http://github.com/ahankinson/pybagit/.
 
 Requirements
@@ -29,7 +29,7 @@ as expected. To run this, simply type
 python setup.py test
 
 in the package directory. NOTE: You will need a network connection to verify
-the 'fetch' tests. If you don't have a network connection you can skip these 
+the 'fetch' tests. If you don't have a network connection you can skip these
 tests by commenting them out in 'bagtest.py'
 
 
@@ -52,7 +52,7 @@ setup(
     name = 'pybagit',
     long_description = longdesc,
     version = '1.5.1',
-    url = 'http://www.musiclibs.net/pybagit',
+    url = 'http://ahankinson.github.io/pybagit',
     author = 'Andrew Hankinson',
     author_email = 'andrew.hankinson@mail.mcgill.ca',
     license = 'http://www.opensource.org/licenses/mit-license.php',
