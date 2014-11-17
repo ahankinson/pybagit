@@ -24,7 +24,7 @@ class ManifestTest(unittest.TestCase):
     def test_md5(self):
         self.bag.set_hash_encoding('md5')
         self.bag.update()
-        self.assertEquals(self.bag.manifest_contents[os.path.join('data','subdir','subsubdir', 'angry.jpg')],
+        self.assertEquals(self.bag.manifest_contents[os.path.join('data', 'subdir', 'subsubdir', 'angry.jpg')],
                 '5f294603675cb6c0f83cef9316bb5be7')
 
     def test_sha1_manifest(self):

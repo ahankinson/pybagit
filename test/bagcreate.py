@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import unittest
 import os
 import shutil
@@ -7,7 +9,6 @@ from pybagit.bagit import BagIt
 class CreateTest(unittest.TestCase):
 
     def setUp(self):
-        print "Setting up Create"
         pass
 
     def tearDown(self):
@@ -34,6 +35,9 @@ class CreateTest(unittest.TestCase):
         self.assertTrue(os.path.exists(os.path.join(os.getcwd(), 'test', 'newtestbag', 'fetch.txt')))
         self.assertTrue(os.path.exists(os.path.join(os.getcwd(), 'test', 'newtestbag', 'tagmanifest-sha1.txt')))
 
+    def test_unicode_characters_in_bagnam(self):
+        newbag = BagIt(os.path.join(os.getcwd(), 'test', 'tëst'))
+        self.assertTrue(os.path.exists(os.path.join(os.getcwd(), 'test', 'tëst')))
 
 def suite():
     test_suite = unittest.makeSuite(CreateTest, 'test')

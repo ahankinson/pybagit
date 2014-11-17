@@ -48,17 +48,20 @@ def write_manifest(datadir, encoding):
     p.close()
     p.join()
 
-    mfile = codecs.open(os.path.join(bag_root, manifest_file), 'w', encoding)
+    mfile = codecs.open(os.path.join(bag_root, manifest_file), 'wb', encoding)
+
     for csum, cfile in mapresult:
         rp = os.path.relpath(cfile, bag_root)
         fl = ensure_unix_pathname(rp)
-        mfile.write("{0} {1}\n".format(csum, fl))
+        mfile.write(u"{0} {1}\n".format(csum, fl))
+
     mfile.close()
 
 
 def dirwalk(datadir):
     datafiles = []
-    for dirpath, dirnames, filenames in os.walk(datadir):
+
+    for dirpath, dirnames, filenames in os.walk(u"{0}".format(datadir)):
         for fn in filenames:
             datafiles.append(os.path.join(dirpath, fn))
     return datafiles
@@ -90,7 +93,7 @@ def ensure_unix_pathname(pathname):
     # it's only windows we have to worry about
     if sys.platform != "win32":
         return pathname
-    replace = re.compile(r"\\")
+    replace = re.compile(r"\\", re.UNICODE)
     fnm = re.sub(replace, "/", pathname)
     return fnm
 
@@ -112,4 +115,5 @@ if __name__ == "__main__":
 
     if len(args) < 1:
         parser.error("You must specify a data directory")
+
     write_manifest(args[0], ENCODING)
