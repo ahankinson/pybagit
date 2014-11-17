@@ -40,18 +40,18 @@ import re
 
 import time
 
-
 # import bagit-specific exceptions.
 from pybagit.exceptions import *
 
+
 class BagIt:
     def __init__(self, bag, validate=False, extended=True, fetch=False):
-        """ Creates a Bag object. If file doesn't exist, it initializes an 
-            empty directory with empty files; if it does, it reads in the 
+        """ Creates a Bag object. If file doesn't exist, it initializes an
+            empty directory with empty files; if it does, it reads in the
             existing files.
 
             If validate is True, it runs the validate() method to check the bag's
-            consistency and completeness. 
+            consistency and completeness.
 
             If fetch is True, it fetches the files from fetch.txt and places
             them in the appropriate directory.
@@ -136,7 +136,7 @@ class BagIt:
         self.manifest_file = os.path.join(self.bag_directory, "manifest-{0}.txt".format(self.hash_encoding))
 
     def show_bag_info(self):
-        """ Shows some information on the bag, it's contents and metadta. 
+        """ Shows some information on the bag, it's contents and metadta.
 
             !!! TODO: Make this look prettier.
         """
@@ -643,7 +643,7 @@ class BagIt:
                 k = self._ensure_unix_pathname(k)
 
             # we write this to the manifest reversing the checksum & path.
-            mfile.write("{0} {1}\n".format(v, k))
+            mfile.write(u"{0} {1}\n".format(v, k))
         mfile.close()
 
     def _read_manifest_to_dict(self, mode="d"):
