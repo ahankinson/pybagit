@@ -3,12 +3,13 @@ import os
 import shutil
 from pybagit.bagit import BagIt
 
+
 class CompressTest(unittest.TestCase):
-    
+
     def setUp(self):
         print "Setting up Compress"
         self.bag = BagIt(os.path.join(os.getcwd(), 'test', 'testbag'))
-    
+
     def tearDown(self):
         if os.path.exists(os.path.join(os.getcwd(), 'test', 'testbag.tgz')):
             os.remove(os.path.join(os.getcwd(), 'test', 'testbag.tgz'))
@@ -22,16 +23,15 @@ class CompressTest(unittest.TestCase):
             os.remove(os.path.join(os.getcwd(), 'test', 'newzipbag.zip'))
         if os.path.exists(os.path.join(os.getcwd(), 'test', 'newtgzbag.tgz')):
             os.remove(os.path.join(os.getcwd(), 'test', 'newtgzbag.tgz'))
-        
-    
+
     def test_compress_tgz(self):
         self.bag.package(os.path.join(os.getcwd(), 'test'))
         self.assertTrue(os.path.exists(os.path.join(os.getcwd(), 'test', 'testbag.tgz')))
-    
+
     def test_compress_zip(self):
         self.bag.package(os.path.join(os.getcwd(), 'test'), method='zip')
         self.assertTrue(os.path.exists(os.path.join(os.getcwd(), 'test', 'testbag.zip')))
-    
+
     def test_uncompress_tgz(self):
         # create an empty tgz bag.
         newbag = BagIt(os.path.join(os.getcwd(), 'test', 'newtgzbag'))
@@ -41,7 +41,7 @@ class CompressTest(unittest.TestCase):
         # this should leave us with just newtgzbag.tgz
         tgzbag = BagIt(os.path.join(os.getcwd(), 'test', 'newtgzbag.tgz'))
         self.assertTrue(os.path.exists(tgzbag.bag_directory))
-        
+
     def test_uncompress_zip(self):
         # create an empty zip bag.
         newbag = BagIt(os.path.join(os.getcwd(), 'test', 'newzipbag'))
@@ -51,6 +51,7 @@ class CompressTest(unittest.TestCase):
         # this should leave us with just newtgzbag.tgz
         zipbag = BagIt(os.path.join(os.getcwd(), 'test', 'newzipbag.zip'))
         self.assertTrue(os.path.exists(zipbag.bag_directory))
+
 
 def suite():
     test_suite = unittest.makeSuite(CompressTest, 'test')
