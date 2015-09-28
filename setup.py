@@ -51,7 +51,7 @@ easy_install pybagit
 setup(
     name = 'pybagit',
     long_description = longdesc,
-    version = '1.5.1',
+    version = '1.5.2',
     url = 'http://ahankinson.github.io/pybagit',
     author = 'Andrew Hankinson',
     author_email = 'andrew.hankinson@mail.mcgill.ca',
@@ -59,9 +59,9 @@ setup(
     packages = find_packages(exclude=['ez_setup']),
     classifiers = [ 'Development Status :: 5 - Production/Stable',
                     'Intended Audience :: Information Technology',
-                    'License :: OSI Approved :: MIT License', 
+                    'License :: OSI Approved :: MIT License',
                     'Operating System :: OS Independent',
-                    'Topic :: Internet', 
+                    'Topic :: Internet',
                     'Topic :: Software Development :: Libraries',
                     'Topic :: System :: Archiving :: Packaging'
                     ],

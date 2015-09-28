@@ -244,8 +244,10 @@ class BagIt:
 
         # clean up any old manifest files. We'll be regenerating them later.
         filelist = os.listdir(self.bag_directory)
-        tagmanifests = [f for f in filelist if re.match(r"^tagmanifest-(sha1|md5)\.txt", f)]
-        datamanifests = [f for f in filelist if re.match(r"^manifest-(sha1|md5)\.txt", f)]
+        tagmanifests = [f for f in filelist
+                        if re.match(r"^tagmanifest-(sha1|md5)\.txt", f)]
+        datamanifests = [f for f in filelist
+                         if re.match(r"^manifest-(sha1|md5)\.txt", f)]
         old_manifests = tagmanifests + datamanifests
         for man in old_manifests:
             os.unlink(os.path.join(self.bag_directory, man))
@@ -530,30 +532,37 @@ class BagIt:
         compressed_file = os.path.join(tdir, bagname)
 
         if method is "zip":
-            z = zipfile.ZipFile(compressed_file, mode='w', allowZip64=zip64)
+            z = zipfile.ZipFile(compressed_file, mode='w',
+                                compression=zipfile.ZIP_DEFLATED,
+                                allowZip64=zip64)
             for d in os.walk(self.bag_directory):
                 for f in d[2]:
-                    # zipfile write takes two arguments. The first is the *absolute* path of the
-                    # file to compress, and the second is the *relative* path to the root of the zipfile.
+                    # zipfile write takes two arguments. The first is the
+                    # *absolute* path of the file to compress, and the second
+                    # is the *relative* path to the root of the zipfile.
                     z.write(os.path.join(d[0], f),
-                            os.path.relpath(os.path.join(d[0], f), self.bag_directory)
-                            )
+                            os.path.relpath(os.path.join(d[0], f),
+                                            self.bag_directory))
             z.close()
         else:
             t = tarfile.open(name=compressed_file, mode='w:gz')
             # why couldn't zipfile be like this?? So nice...
-            t.add(self.bag_directory, arcname=os.path.relpath(self.bag_directory, self.bag_directory), recursive=True)
+            t.add(self.bag_directory,
+                  arcname=os.path.relpath(self.bag_directory,
+                                          self.bag_directory), recursive=True)
             t.close()
 
         return compressed_file
 
     def _parse_encoding_string(self, string):
-        re_vstring = re.compile(r"Tag-File-Character-Encoding: (?P<encoding>.*)", re.IGNORECASE)
+        re_vstring = re.compile(
+            r"Tag-File-Character-Encoding: (?P<encoding>.*)", re.IGNORECASE)
         results = re.search(re_vstring, string)
         return results.group('encoding')
 
     def _parse_version_string(self, string):
-        re_vstring = re.compile(r"BagIt-Version: (?P<major>\d+)\.(?P<minor>\d+)", re.IGNORECASE)
+        re_vstring = re.compile(
+            r"BagIt-Version: (?P<major>\d+)\.(?P<minor>\d+)", re.IGNORECASE)
         results = re.search(re_vstring, string)
         return (int(results.group('major')), int(results.group('minor')))
 
@@ -570,10 +579,11 @@ class BagIt:
             for it in fcontents:
                 url, length, filename = it.split(" ")
                 fname = os.path.normpath(filename.strip())
-                line = {'url': url.strip(), 'length': length.strip(), 'filename': fname}
+                line = {'url': url.strip(), 'length': length.strip(),
+                        'filename': fname}
                 fetch.append(line)
             self.fetch_contents = fetch
-        except Exception, e:
+        except Exception:
             self.bag_errors.append(('fetch', 'Fetch file may be malformed.'))
             raise BagError('Fetch file may be malformed.')
 
