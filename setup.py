@@ -6,7 +6,7 @@ except ImportError:
     from setuptools import setup, find_packages
 
 longdesc = """
-PyBagIt Version 1.5
+PyBagIt Version 1.5.3
 
 This module helps with creating an managing BagIt-compliant packages. It has
 been created to conform to BagIt v0.96.
@@ -51,7 +51,7 @@ easy_install pybagit
 setup(
     name = 'pybagit',
     long_description = longdesc,
-    version = '1.5.2',
+    version = '1.5.3',
     url = 'http://ahankinson.github.io/pybagit',
     author = 'Andrew Hankinson',
     author_email = 'andrew.hankinson@mail.mcgill.ca',

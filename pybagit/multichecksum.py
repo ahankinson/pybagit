@@ -37,23 +37,32 @@ from pybagit.exceptions import *
 HASHALG = 'sha1'
 ENCODING = "utf-8"
 
-
-def write_manifest(datadir, encoding):
+def write_manifest(datadir, encoding, update=False):
     bag_root = os.path.split(os.path.abspath(datadir))[0]
+    manifest_file = os.path.join(bag_root, "manifest-{0}.txt".format(HASHALG))
 
-    manifest_file = "manifest-{0}.txt".format(HASHALG)
+    checksums = dict()
+    files_to_checksum = set(dirwalk(datadir))
+    if update and os.path.isfile(manifest_file):
+        for line in codecs.open(manifest_file, 'rb', encoding):
+            checksum, file_ = line.strip().split(' ', 1)
+            full_file = os.path.join(bag_root, file_)
+            if full_file in files_to_checksum:
+                files_to_checksum.remove(full_file)
+                checksums[os.path.join(bag_root, file_)] = checksum
 
     p = multiprocessing.Pool(processes=multiprocessing.cpu_count())
-    mapresult = p.map_async(csumfile, dirwalk(datadir)).get()
+    result = p.map_async(csumfile, files_to_checksum)
+    checksums.update((k, v) for v, k in result.get())
     p.close()
     p.join()
 
-    mfile = codecs.open(os.path.join(bag_root, manifest_file), 'wb', encoding)
+    mfile = codecs.open(manifest_file, 'wb', encoding)
 
-    for csum, cfile in mapresult:
-        rp = os.path.relpath(cfile, bag_root)
+    for file_, checksum in sorted(checksums.iteritems()):
+        rp = os.path.relpath(file_, bag_root)
         fl = ensure_unix_pathname(rp)
-        mfile.write(u"{0} {1}\n".format(csum, fl))
+        mfile.write(u"{0} {1}\n".format(checksum, fl))
 
     mfile.close()
 
@@ -103,6 +112,7 @@ if __name__ == "__main__":
     usage = "%prog [options] arg1 arg2"
     parser.add_option("-a", "--algorithm", action="store", help="checksum algorithm to use (sha1|md5)")
     parser.add_option("-c", "--encoding", action="store", help="File encoding to write manifest")
+    parser.add_option("-u", "--update", action="store_true", help="Only update new/removed files")
     (options, args) = parser.parse_args()
 
     if options.algorithm:
@@ -116,4 +126,4 @@ if __name__ == "__main__":
     if len(args) < 1:
         parser.error("You must specify a data directory")
 
-    write_manifest(args[0], ENCODING)
+    write_manifest(args[0], ENCODING, update=options.update)

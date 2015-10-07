@@ -236,37 +236,85 @@ class BagIt:
         self.bag_errors = errors
         return self.bag_errors
 
-    def update(self):
+    def update(self, full=True):
         """ Scans the data directory, adds any new files it finds to the
             manifest, and removes any files from the manifest that it does not
             find in the directory.
+
+        Args:
+            full (bool): Only add new files and remove missing files and skip
+            reindexing of previously indexed files
+
+        Returns:
+            (set, set, set): new files, existing files, removed files
         """
 
-        # clean up any old manifest files. We'll be regenerating them later.
         filelist = os.listdir(self.bag_directory)
-        tagmanifests = [f for f in filelist
-                        if re.match(r"^tagmanifest-(sha1|md5)\.txt", f)]
+
+        # Read old manifest so we can detect new, existing and deleted files
+        md5_hashes = dict()
+        sha1_hashes = dict()
         datamanifests = [f for f in filelist
                          if re.match(r"^manifest-(sha1|md5)\.txt", f)]
-        old_manifests = tagmanifests + datamanifests
-        for man in old_manifests:
-            os.unlink(os.path.join(self.bag_directory, man))
+        for man in datamanifests:
+            man = os.path.join(self.bag_directory, man)
+            if 'manifest-md5.txt' in man:
+                for line in codecs.open(man, 'rb', self.tag_file_encoding):
+                    hash_, file_ = line.split(' ', 1)
+                    md5_hashes[file_] = hash_
+            elif 'manifest-sha1.txt' in man:
+                for line in codecs.open(man, 'rb', self.tag_file_encoding):
+                    hash_, file_ = line.split(' ', 1)
+                    sha1_hashes[file_] = hash_
 
-        # add an empty .keep file in empty directories.
-        for dirpath, dirname, fnames in os.walk(self.data_directory):
-            if not os.listdir(dirpath):
-                open(os.path.join(dirpath, '.keep'), 'w').close()
+            if full:
+                os.unlink(man)
 
-        # Sanitize Data Directory
-        for dirpath, dirname, fnames in os.walk(self.data_directory):
-            for fname in fnames:
-                newfile = self._sanitize_filename(fname)
-                if newfile != fname:
-                    os.rename(os.path.join(dirpath, fname), os.path.join(dirpath, newfile))
+        # clean up any old manifest files. We'll be regenerating them later.
+        tagmanifests = [f for f in filelist
+                        if re.match(r"^tagmanifest-(sha1|md5)\.txt", f)]
+        for man in tagmanifests:
+            man = os.path.join(self.bag_directory, man)
+            os.unlink(man)
+
+        new = set()
+        existing = set()
+        removed = set()
+
+        for path, dirs, files in os.walk(self.data_directory):
+            # add an empty .keep file in empty directories.
+            if not dirs and not files:
+                open(os.path.join(path, '.keep'), 'w').close()
+
+            for name in files:
+                newfile = self._sanitize_filename(name)
+                full_file = os.path.join(path, newfile)
+                if newfile != name:
+                    os.rename(os.path.join(path, name), full_file)
+
+                relative_file = os.path.relpath(full_file, self.data_directory)
+                if relative_file in md5_hashes:
+                    existing.add(relative_file)
+                elif relative_file in sha1_hashes:
+                    existing.add(relative_file)
+                else:
+                    new.add(relative_file)
+
+        removed = (set(md5_hashes) | set(sha1_hashes)) - existing
+        existing -= removed
 
         # checksum the data directory
-        cmd = [sys.executable, self._path_to_multichecksum, "-a", self.hash_encoding, "-c", self.tag_file_encoding, self.data_directory]
-        p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        cmd = [
+            sys.executable,
+            self._path_to_multichecksum,
+            "-a", self.hash_encoding,
+            "-c", self.tag_file_encoding,
+            self.data_directory,
+        ]
+        if not full:
+            cmd.append('-u')
+        p = subprocess.Popen(cmd, stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE)
 
         while p.returncode is None:
             time.sleep(0.1)
@@ -287,6 +335,8 @@ class BagIt:
 
         # read it back in
         self._read_manifest_to_dict(mode="t")
+
+        return new, existing, removed
 
     def fetch(self, validate_downloads=False):
         """ Downloads files into the data directory.
@@ -694,7 +744,7 @@ class BagIt:
                 ent = re.split(splitreg, line)
                 # clean up the entries: discard empty items and strip whitespace
                 # from the beginning of the file path.
-                v, k = [x.lstrip().rstrip() for x in ent if len(x) != 0]
+                v, k = [x.strip() for x in ent if x.strip()]
 
                 # for Windows compatibility when *reading* a bag we need to ensure
                 # that it can resolve the paths. This will set any forward slashes to back
