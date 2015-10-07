@@ -77,6 +77,9 @@ class BagIt:
         self.bag_compression   = None  # compression type (if any)
         self.bag_errors        = []  # list of bag validation errors
         self.platform          = sys.platform  # set the platform value.
+        self.new_files         = set()  # Files added discovered in the last update()
+        self.existing_files    = set()  # Files known before the last update()
+        self.deleted_files     = set()  # Files deleted before the last update()
 
         module_path = os.path.dirname(os.path.abspath(__file__))
         self._path_to_multichecksum = os.path.join(module_path, "multichecksum.py")
@@ -244,9 +247,6 @@ class BagIt:
         Args:
             full (bool): Only add new files and remove missing files and skip
             reindexing of previously indexed files
-
-        Returns:
-            (set, set, set): new files, existing files, removed files
         """
 
         filelist = os.listdir(self.bag_directory)
@@ -277,9 +277,9 @@ class BagIt:
             man = os.path.join(self.bag_directory, man)
             os.unlink(man)
 
-        new = set()
-        existing = set()
-        removed = set()
+        self.new_files = set()
+        self.existing_files = set()
+        self.removed_files = set()
 
         for path, dirs, files in os.walk(self.data_directory):
             # add an empty .keep file in empty directories.
@@ -287,21 +287,22 @@ class BagIt:
                 open(os.path.join(path, '.keep'), 'w').close()
 
             for name in files:
-                newfile = self._sanitize_filename(name)
-                full_file = os.path.join(path, newfile)
-                if newfile != name:
+                self.new_filesfile = self._sanitize_filename(name)
+                full_file = os.path.join(path, self.new_filesfile)
+                if self.new_filesfile != name:
                     os.rename(os.path.join(path, name), full_file)
 
                 relative_file = os.path.relpath(full_file, self.data_directory)
                 if relative_file in md5_hashes:
-                    existing.add(relative_file)
+                    self.existing_files.add(relative_file)
                 elif relative_file in sha1_hashes:
-                    existing.add(relative_file)
+                    self.existing_files.add(relative_file)
                 else:
-                    new.add(relative_file)
+                    self.new_files.add(relative_file)
 
-        removed = (set(md5_hashes) | set(sha1_hashes)) - existing
-        existing -= removed
+        known_files = set(md5_hashes) | set(sha1_hashes)
+        self.removed_files = known_files - self.existing_files
+        self.existing_files -= self.removed_files
 
         # checksum the data directory
         cmd = [
@@ -335,8 +336,6 @@ class BagIt:
 
         # read it back in
         self._read_manifest_to_dict(mode="t")
-
-        return new, existing, removed
 
     def fetch(self, validate_downloads=False):
         """ Downloads files into the data directory.
