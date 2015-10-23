@@ -35,8 +35,8 @@
 <h1>PyBagIt 1.0 Documentation</h1>
 <p>Project Website: <a href="http://ahankinson.github.io/pybagit">http://ahankinson.github.io/pybagit</a></p>
 <p>Code hosting: <a href="http://github.com/ahankinson/pybagit">http://github.com/ahankinson/pybagit</a></p>
-<p>BagIt 0.96 Spec: <a href="http://www.digitalpreservation.gov/library/resources/tools/docs/bagitspec.pdf">http://www.digitalpreservation.gov/library/resources/tools/docs/bagitspec.pdf</a></p>
-<p>This module simplifies creation and management of BagIt files. Version 1.0 of this module conforms to the BagIt v0.96 specification.</p>
+<p>BagIt 0.97 Spec: <a href="http://www.loc.gov/digitalpreservation/documents/bagitspec.pdf">http://www.loc.gov/digitalpreservation/documents/bagitspec.pdf</a></p>
+<p>This module simplifies creation and management of BagIt files. Version 1.0 of this module conforms to the BagIt v0.97 specification.</p>
 
 <p>This is a "loosely monitored" bag system. The constructor simply specifies a folder to monitor. Files can be added and removed from the data directory at will, and the <code>update()</code> method for that bag will automatically checksum and add all the appropriate files to the manifest files.</p>
 
@@ -111,7 +111,7 @@
 <h3><code>instance.show_bag_info()</code></h3>
 <p>Prints a number of bag properties, e.g.</p>
 <pre>
-Bag Version: 0.96
+Bag Version: 0.97
 Tag File Encoding: utf-8
 Bag Type: Extended
 
@@ -188,9 +188,9 @@ No Errors.
 <h3><code>instance.hash_encoding</code></h3>
 <p><code>sha1</code> or <code>md5</code>. Default is <code>sha1</code>
 <h3><code>instance.bag_major_version</code></h3>
-<p>Returns the major version number as declared in bagit.txt. Any files created by this package will be default to v0.96, so this property would return 0.</p>
+<p>Returns the major version number as declared in bagit.txt. Any files created by this package will be default to v0.97, so this property would return 0.</p>
 <h3><code>instance.bag_minor_version</code></h3>
-<p>Returns the minor version number as declared in bagit.txt. Any files created by this package will be default to v0.96, so this property would return 96.</p>
+<p>Returns the minor version number as declared in bagit.txt. Any files created by this package will be default to v0.97, so this property would return 97.</p>
 <h3><code>instance.tag_file_encoding</code></h3> 
 <p>Returns the tag file encoding as declared in bagit.txt. Any files created by this package will default to utf-8.</p>
 <h3><code>instance.data_directory</code></h3>
