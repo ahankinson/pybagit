@@ -61,7 +61,7 @@ class BagIt:
         self.extended          = extended  # True if it is an 'extended' bag; False if it is not.
         self.hash_encoding     = u'sha1'  # default hash encoding. Could also be md5. Should always be lowercase.
         self.bag_major_version = 0
-        self.bag_minor_version = 96   # default bagit version. Set to the latest approved version.
+        self.bag_minor_version = 97   # default bagit version. Set to the latest approved version.
         self.tag_file_encoding = u'utf-8'  # default text encoding. always lower case.
         self.data_directory    = None  # path to the bag data directory
         self.bag_directory     = None  # path to the bag directory

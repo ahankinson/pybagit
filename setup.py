@@ -9,7 +9,7 @@ longdesc = """
 PyBagIt Version 1.5
 
 This module helps with creating an managing BagIt-compliant packages. It has
-been created to conform to BagIt v0.96.
+been created to conform to BagIt v0.97.
 
 Documentation is available at http://ahankinson.github.io/pybagit.
 Code hosting is available on GitHub at http://github.com/ahankinson/pybagit/.
