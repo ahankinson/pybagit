@@ -14,6 +14,8 @@ class CreateTest(unittest.TestCase):
     def tearDown(self):
         if os.path.exists(os.path.join(os.getcwd(), 'test', 'newtestbag')):
             shutil.rmtree(os.path.join(os.getcwd(), 'test', 'newtestbag'))
+        if os.path.exists(os.path.join(os.getcwd(), 'test', 'tëst')):
+            shutil.rmtree(os.path.join(os.getcwd(), 'test', 'tëst'))
 
     def test_minimal_bag_creation(self):
         newbag = BagIt(os.path.join(os.getcwd(), 'test', 'newtestbag'), extended=False)
